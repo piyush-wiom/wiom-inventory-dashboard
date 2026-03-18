@@ -1,14 +1,11 @@
-import type { Transaction, DailyMovement } from '@/types/inventory';
+import type { DeviceRecord, DailyEntry } from '@/types/inventory';
+import { DISPATCHED_STATUSES } from './constants';
 
-// ---------------------------------------------------------------------------
-// Build a date range array of N days ending today (IST), inclusive
-// ---------------------------------------------------------------------------
 function buildDateRange(days: number): string[] {
   const dates: string[] = [];
-  const todayIST = new Date(
-    new Date().toLocaleString('en-CA', { timeZone: 'Asia/Kolkata' }),
-  );
-
+  // IST = UTC + 5h30m — reliable cross-platform calculation
+  const istOffset = 5.5 * 60 * 60 * 1000;
+  const todayIST = new Date(Date.now() + istOffset);
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date(todayIST);
     d.setDate(d.getDate() - i);
@@ -17,53 +14,27 @@ function buildDateRange(days: number): string[] {
   return dates;
 }
 
-// ---------------------------------------------------------------------------
-// Aggregate transactions into daily movement buckets
-// ---------------------------------------------------------------------------
-export function aggregateDailyMovements(
-  transactions: Transaction[],
-  days: number = 30,
-): DailyMovement[] {
+export function aggregateDailyEntries(
+  records: DeviceRecord[],
+  days = 30,
+): DailyEntry[] {
   const dateRange = buildDateRange(days);
 
   return dateRange.map((date) => {
-    const dayTx = transactions.filter((t) => t.docDate === date);
-
-    const sum = (type: string) =>
-      dayTx
-        .filter((t) => t.transactionType === type)
-        .reduce((acc, t) => acc + t.qty, 0);
-
-    const freshInward = sum('Fresh Inward');
-    const returnInward = sum('Return Inward');
-    const rmaInward = sum('RMA Inward');
-    const stnReceiving = sum('STN Receiving');
-    const positiveAdj = sum('Positive Adjustment');
-    const salesDispatch = sum('Sales Dispatch');
-    const rmaOut = sum('RMA Out');
-    const stnDispatch = sum('STN Dispatch');
-    const negativeAdj = sum('Negative Adjustment');
-    const disposal = sum('Disposal');
-
-    const totalInward =
-      freshInward + returnInward + rmaInward + stnReceiving + positiveAdj;
-    const totalOutward =
-      salesDispatch + rmaOut + stnDispatch + negativeAdj + disposal;
+    const added = records.filter((r) => r.entryDate === date);
+    const dispatched = records.filter(
+      (r) =>
+        r.dispatchDate === date &&
+        DISPATCHED_STATUSES.includes(r.dispatchStatus),
+    );
 
     return {
       date,
-      totalInward,
-      totalOutward,
-      freshInward,
-      returnInward,
-      rmaInward,
-      stnReceiving,
-      positiveAdj,
-      salesDispatch,
-      rmaOut,
-      stnDispatch,
-      negativeAdj,
-      disposal,
+      added: added.length,
+      dispatched: dispatched.length,
+      router: added.filter((r) => r.assetType === 'ROUTER').length,
+      onu: added.filter((r) => r.assetType === 'ONU').length,
+      ont: added.filter((r) => r.assetType === 'ONT').length,
     };
   });
 }

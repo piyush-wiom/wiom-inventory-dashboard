@@ -11,7 +11,7 @@ require('dotenv').config({ path: 'C:\\credentials\\.env' });
 
 import { SHEET_ID, SHEET_TAB } from './constants';
 
-export async function fetchSheetRows(): Promise<string[][]> {
+async function fetchTab(tabName: string): Promise<string[][]> {
   const apiKey = process.env.GOOGLE_SHEETS_API_KEY;
 
   if (!apiKey) {
@@ -23,18 +23,23 @@ export async function fetchSheetRows(): Promise<string[][]> {
 
   const url =
     `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}` +
-    `/values/${encodeURIComponent(SHEET_TAB)}?key=${apiKey}`;
+    `/values/${encodeURIComponent(tabName)}?key=${apiKey}`;
 
   const res = await fetch(url, { cache: 'no-store' });
 
   if (!res.ok) {
     const body = await res.text();
-    throw new Error(
-      `Google Sheets API error ${res.status}: ${body}`,
-    );
+    throw new Error(`Google Sheets API error ${res.status}: ${body}`);
   }
 
   const json = await res.json();
-  // json.values is string[][] — first row is headers
   return (json.values ?? []) as string[][];
+}
+
+export async function fetchSheetRows(): Promise<string[][]> {
+  return fetchTab(SHEET_TAB);
+}
+
+export async function fetchTabRows(tab: string): Promise<string[][]> {
+  return fetchTab(tab);
 }

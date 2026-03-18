@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:docs.google.com)",
+      "mcp__c1fc4002-5f49-5f9d-a4e5-93c4ef5d6a75__google_drive_fetch",
+      "mcp__c1fc4002-5f49-5f9d-a4e5-93c4ef5d6a75__google_drive_search",
+      "Bash(npm --version)",
+      "Bash(npx --version)",
+      "Bash(npm list:*)",
+      "Read(//c/Claude Projects/**)",
+      "Bash(npx create-next-app@14 wiom-inventory-dashboard --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --no-git --yes)",
+      "Bash(npm install:*)",
+      "Bash(npx shadcn-ui@latest init --yes)",
+      "Bash(npx shadcn@latest init --yes)",
+      "Bash(npx shadcn@latest init -d)",
+      "Bash(npx shadcn@latest add card badge table input select skeleton accordion --yes)",
+      "Bash(robocopy \"C:\\\\Claude Projects\\\\wiom-inventory-dashboard\" \"C:\\\\Claude Projects\\\\Inventory Dashboard\" /E /XD \".claude\" /NFL /NJH /NJS)",
+      "Bash(dir \"C:\\\\Claude Projects\\\\Inventory Dashboard\")",
+      "Bash(cmd /c dir \"C:\\\\Claude Projects\\\\Inventory Dashboard\")",
+      "Bash(powershell -Command \"Get-ChildItem ''C:\\\\Claude Projects\\\\Inventory Dashboard''\")",
+      "Bash(powershell -Command \"Copy-Item -Path ''C:\\\\Claude Projects\\\\wiom-inventory-dashboard\\\\*'' -Destination ''C:\\\\Claude Projects\\\\Inventory Dashboard\\\\'' -Recurse -Force -Exclude ''.claude''; Write-Host ''Copy done''\")",
+      "Bash(powershell -Command \"Get-ChildItem ''C:\\\\Claude Projects\\\\Inventory Dashboard'' | Select Name\")",
+      "Bash(npm run:*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(node -e \":*)"
+    ]
+  }
+}

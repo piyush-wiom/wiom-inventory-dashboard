@@ -1,40 +1,23 @@
 import { Badge } from '@/components/ui/badge';
-import type { ReconciliationStatus } from '@/types/inventory';
+import type { DispatchStatus } from '@/types/inventory';
 
 interface StatusBadgeProps {
-  status: ReconciliationStatus;
+  status: DispatchStatus;
 }
 
-const STATUS_CONFIG: Record<
-  ReconciliationStatus,
-  { label: string; className: string }
-> = {
-  Reconciled: {
-    label: '✅ Reconciled',
-    className: 'bg-green-100 text-green-800 border-green-200',
-  },
-  Partial: {
-    label: '⚠️ Partial',
-    className: 'bg-amber-100 text-amber-800 border-amber-200',
-  },
-  Open: {
-    label: '❌ Open',
-    className: 'bg-red-100 text-red-800 border-red-200',
-  },
-  'Force Closed': {
-    label: '🔒 Force Closed',
-    className: 'bg-gray-100 text-gray-700 border-gray-200',
-  },
-};
+const IN_STOCK = ['Pending', 'Ready for Dispatch'];
+const DISPATCHED = ['Dispatched to Partners', 'Sold to Partner'];
 
 export function StatusBadge({ status }: StatusBadgeProps) {
-  const config = STATUS_CONFIG[status] ?? STATUS_CONFIG['Open'];
+  const cls = IN_STOCK.includes(status)
+    ? 'bg-green-50 text-green-800 border-green-200'
+    : DISPATCHED.includes(status)
+      ? 'bg-red-50 text-red-800 border-red-200'
+      : 'bg-gray-50 text-gray-700 border-gray-200';
+
   return (
-    <Badge
-      variant="outline"
-      className={`whitespace-nowrap text-xs font-medium ${config.className}`}
-    >
-      {config.label}
+    <Badge variant="outline" className={`whitespace-nowrap text-xs font-medium ${cls}`}>
+      {status}
     </Badge>
   );
 }

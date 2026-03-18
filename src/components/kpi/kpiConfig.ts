@@ -1,60 +1,51 @@
 import type { KpiData } from '@/types/inventory';
-import { DOI_ALERT_THRESHOLD } from '@/lib/constants';
 
 export interface KpiCardConfig {
   id: string;
   label: string;
-  icon: string; // lucide icon name
-  getValue: (kpi: KpiData) => string;
-  getColour: (kpi: KpiData) => string;
-  subtitle: (kpi: KpiData) => string;
+  icon: string;
+  getValue: (k: KpiData) => string;
+  getColour: (k: KpiData) => string;
+  subtitle: (k: KpiData) => string;
 }
 
 export const KPI_CARDS: KpiCardConfig[] = [
   {
-    id: 'closingStock',
-    label: 'Closing Stock',
+    id: 'totalStock',
+    label: 'Current Stock',
     icon: 'Package',
-    getValue: (k) => k.closingStock.toLocaleString('en-IN'),
+    getValue: (k) => k.totalStock.toLocaleString('en-IN'),
     getColour: () => 'text-slate-700',
     subtitle: (k) =>
-      `Opening: ${k.openingStock.toLocaleString('en-IN')} units`,
+      `✅ ${k.goodStock.toLocaleString('en-IN')} Good  ·  ❌ ${k.badStock.toLocaleString('en-IN')} Bad`,
   },
   {
-    id: 'todayInward',
-    label: "Today's Inward",
+    id: 'assetBreakdown',
+    label: 'By Asset Type',
+    icon: 'Layers',
+    getValue: (k) => `${k.routerStock + k.onuStock + k.ontStock}`,
+    getColour: () => 'text-blue-700',
+    subtitle: (k) =>
+      `Router: ${k.routerStock}  ·  ONU: ${k.onuStock}  ·  ONT: ${k.ontStock}`,
+  },
+  {
+    id: 'todayAdded',
+    label: "Today's Additions",
     icon: 'ArrowDownToLine',
-    getValue: (k) => `+${k.todayInward.toLocaleString('en-IN')}`,
+    getValue: (k) => `+${k.todayAdded.toLocaleString('en-IN')}`,
     getColour: () => 'text-green-600',
-    subtitle: () => 'Units received today',
+    subtitle: (k) => `Dispatched today: ${k.dispatchedToday.toLocaleString('en-IN')}`,
   },
   {
-    id: 'todayOutward',
-    label: "Today's Outward",
+    id: 'totalDispatched',
+    label: 'Total Dispatched',
     icon: 'ArrowUpFromLine',
-    getValue: (k) => `−${k.todayOutward.toLocaleString('en-IN')}`,
+    getValue: (k) => k.totalDispatched.toLocaleString('en-IN'),
     getColour: () => 'text-red-600',
-    subtitle: (k) =>
-      `Avg 30d: ${k.avgDailyOutward30d.toLocaleString('en-IN')} units/day`,
-  },
-  {
-    id: 'doi',
-    label: 'Days of Inventory',
-    icon: 'CalendarClock',
-    getValue: (k) => (k.doi < 0 ? '∞' : `${k.doi}`),
-    getColour: (k) =>
-      k.doi < 0
-        ? 'text-slate-500'
-        : k.doi <= DOI_ALERT_THRESHOLD
-          ? 'text-red-600'
-          : k.doi <= DOI_ALERT_THRESHOLD * 1.5
-            ? 'text-orange-500'
-            : 'text-green-600',
-    subtitle: (k) =>
-      k.doi < 0
-        ? 'No outward in last 30 days'
-        : k.doi <= DOI_ALERT_THRESHOLD
-          ? '⚠️ Below threshold — reorder now'
-          : 'Stock level healthy',
+    subtitle: (k) => {
+      const total = k.totalStock + k.totalDispatched;
+      const pct = total > 0 ? Math.round((k.totalDispatched / total) * 100) : 0;
+      return `${pct}% of all ${total.toLocaleString('en-IN')} devices`;
+    },
   },
 ];

@@ -1,55 +1,48 @@
-import type { TransactionType } from '@/types/inventory';
-
-export const DOI_ALERT_THRESHOLD = Number(
-  process.env.NEXT_PUBLIC_DOI_ALERT_THRESHOLD ?? '20',
-);
+// ---------------------------------------------------------------------------
+// Constants — Wiom Inventory Dashboard
+// ---------------------------------------------------------------------------
 
 export const SHEET_ID =
   process.env.NEXT_PUBLIC_SHEET_ID ??
   '1XA-yPDYidXs_8DKRA8QNEbgQLA2tQbu8GkW1wn0OBL0';
 
 export const SHEET_TAB =
-  process.env.NEXT_PUBLIC_SHEET_NAME ?? 'Transaction_Master';
+  process.env.NEXT_PUBLIC_SHEET_NAME ?? 'Delhi_Saket_Area Wise Inv';
 
-// ---------------------------------------------------------------------------
-// Column index map (0-based) for Transaction_Master sheet
-// ---------------------------------------------------------------------------
+// Column indices (0-based) for "Delhi_Saket_Area Wise Inv"
 export const COL = {
-  SR: 0,
-  TRANSACTION_TYPE: 1,
-  DOCUMENT_NO: 2,
-  SOURCE_NODE: 3,
-  DESTINATION_NODE: 4,
-  DOC_DATE: 5,
-  SKU: 6,
-  QTY: 7,
-  STAGE: 8,
-  LINKED_DOC_NO: 9,
-  LINKED_DOC_TYPE: 10,
-  STATUS: 11,
-  REMARKS: 12,
+  DATE: 0,           // Date (MM/DD/YYYY) of Entry
+  MAC_ID: 1,
+  SERIAL_NO: 2,
+  DEVICE_ID: 3,
+  MODEL_NO: 4,
+  ASSET_TYPE: 5,     // ROUTER | ONU | ONT
+  AREA_NAME: 6,
+  SOURCE_INV: 7,     // Return (Refurbished) | Vendor (Virgin) | Received in STN | Stock Received in RMA
+  CONDITION: 8,      // Z-GOOD | Z-BAD
+  INV_STICKERING: 9,
+  DISPATCH_STATUS: 10, // Pending | Ready for Dispatch | Dispatched to Partners | ...
+  QTY: 11,
+  DISPATCH_DATE: 12,
+  DISPATCHED_MONTH: 13,
+  YEAR: 14,
+  TYPE_OF_INVENTORY: 15,
+  WAREHOUSE_TYPE: 16,
+  REMARKS: 21,
 } as const;
 
-// ---------------------------------------------------------------------------
-// Transaction type groupings
-// ---------------------------------------------------------------------------
-export const INWARD_TYPES: TransactionType[] = [
-  'Fresh Inward',
-  'Return Inward',
-  'RMA Inward',
-  'Positive Adjustment',
-  'STN Receiving',
-];
+// Statuses that mean the item is STILL IN STOCK
+export const IN_STOCK_STATUSES = ['Pending', 'Ready for Dispatch'];
 
-export const OUTWARD_TYPES: TransactionType[] = [
-  'Sales Dispatch',
-  'RMA Out',
-  'STN Dispatch',
-  'Negative Adjustment',
-  'Disposal',
-];
-
-export const ALL_TRANSACTION_TYPES: TransactionType[] = [
-  ...INWARD_TYPES,
-  ...OUTWARD_TYPES,
+// Statuses that mean the item has LEFT the warehouse
+export const DISPATCHED_STATUSES = [
+  'Dispatched to Partners',
+  'Sold to Partner',
+  'Returned to Vendor',
+  'Dispatched For Dispose Off',
+  'To be sent to Vendor for RMA',
+  'Will Dispose',
+  'PDO',
+  'Dispatched to Gurgaon office',
+  'Transfered to Mumbai',
 ];

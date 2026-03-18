@@ -1,107 +1,48 @@
 'use client';
 
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { OpenStnList } from './OpenStnList';
-import {
-  COLOR_RECONCILED,
-  COLOR_PARTIAL,
-  COLOR_OPEN,
-  COLOR_FORCE_CLOSED,
-} from '@/components/charts/chartColors';
-import type { ReconciliationSummary as RecSummaryType } from '@/types/inventory';
 
-interface ReconciliationSummaryProps {
-  data?: RecSummaryType;
+interface AreaBreakdownProps {
+  data?: { area: string; count: number }[];
   isLoading?: boolean;
 }
 
-export function ReconciliationSummary({ data, isLoading }: ReconciliationSummaryProps) {
-  if (isLoading || !data) {
-    return <Skeleton className="h-44 w-full rounded-lg" />;
-  }
+const COLORS = [
+  '#3b82f6','#22c55e','#f59e0b','#8b5cf6','#06b6d4',
+  '#ef4444','#f97316','#10b981','#6366f1','#ec4899',
+];
 
-  const pieData = [
-    { name: 'Reconciled', value: data.reconciled, color: COLOR_RECONCILED },
-    { name: 'Partial', value: data.partial, color: COLOR_PARTIAL },
-    { name: 'Open', value: data.open, color: COLOR_OPEN },
-    { name: 'Force Closed', value: data.forceClosed, color: COLOR_FORCE_CLOSED },
-  ].filter((d) => d.value > 0);
-
+export function ReconciliationSummary({ data, isLoading }: AreaBreakdownProps) {
   return (
     <Card className="shadow-sm">
       <CardHeader className="pb-2 pt-4">
         <CardTitle className="text-sm font-semibold text-slate-700">
-          Reconciliation Status
+          In-Stock by Area (Top 10)
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-          {/* Donut chart */}
-          <div className="relative h-36 w-36 flex-shrink-0 mx-auto sm:mx-0">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  innerRadius={40}
-                  outerRadius={60}
-                  paddingAngle={2}
-                  dataKey="value"
-                >
-                  {pieData.map((entry) => (
-                    <Cell key={entry.name} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{ fontSize: 11, borderRadius: 8 }}
-                  formatter={(v) => [
-                    `${v} (${Math.round(((v as number) / data.total) * 100)}%)`,
-                    '',
-                  ]}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-            {/* centre text */}
-            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-lg font-bold text-slate-800">
-                {data.reconciledPct}%
-              </span>
-              <span className="text-xs text-slate-500">done</span>
-            </div>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-            <Stat label="Total" value={data.total} />
-            <Stat label="✅ Reconciled" value={data.reconciled} colour="text-green-700" />
-            <Stat label="⚠️ Partial" value={data.partial} colour="text-amber-600" />
-            <Stat label="❌ Open" value={data.open} colour="text-red-600" />
-            <Stat label="🔒 Force Closed" value={data.forceClosed} colour="text-gray-500" />
-          </div>
-        </div>
-
-        <OpenStnList docNos={data.openStnDocNos} />
+        {isLoading || !data ? (
+          <Skeleton className="h-52 w-full" />
+        ) : data.length === 0 ? (
+          <p className="py-8 text-center text-sm text-slate-400">No area data available.</p>
+        ) : (
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={data} layout="vertical" margin={{ top: 4, right: 24, left: 80, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
+              <XAxis type="number" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v/1000).toFixed(1)}k` : String(v)} />
+              <YAxis type="category" dataKey="area" tick={{ fontSize: 10 }} tickLine={false} width={75} />
+              <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8 }} formatter={(v) => [(v as number).toLocaleString('en-IN'), 'Devices']} />
+              <Bar dataKey="count" radius={[0, 4, 4, 0]}>
+                {data.map((_, i) => (
+                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        )}
       </CardContent>
     </Card>
-  );
-}
-
-function Stat({
-  label,
-  value,
-  colour = 'text-slate-700',
-}: {
-  label: string;
-  value: number;
-  colour?: string;
-}) {
-  return (
-    <div>
-      <p className="text-xs text-slate-400">{label}</p>
-      <p className={`text-sm font-semibold ${colour}`}>
-        {value.toLocaleString('en-IN')}
-      </p>
-    </div>
   );
 }

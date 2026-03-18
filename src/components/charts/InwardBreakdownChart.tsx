@@ -1,77 +1,48 @@
 'use client';
 
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  INWARD_FRESH,
-  INWARD_RETURN,
-  INWARD_RMA,
-  INWARD_STN,
-  INWARD_POS_ADJ,
-} from './chartColors';
-import type { DailyMovement } from '@/types/inventory';
-import type { Period } from '@/hooks/usePeriodFilter';
+import type { SourceBreakdown } from '@/types/inventory';
 
 interface InwardBreakdownChartProps {
-  movements?: DailyMovement[];
-  period: Period;
+  data?: SourceBreakdown;
   isLoading?: boolean;
 }
 
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr + 'T00:00:00');
-  return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
-}
+const COLORS = ['#8b5cf6', '#3b82f6', '#06b6d4', '#f59e0b'];
 
-export function InwardBreakdownChart({
-  movements,
-  period,
-  isLoading,
-}: InwardBreakdownChartProps) {
-  const sliced = movements?.slice(-period) ?? [];
-  const chartData = sliced.map((m) => ({
-    date: formatDate(m.date),
-    Fresh: m.freshInward,
-    Return: m.returnInward,
-    RMA: m.rmaInward,
-    STN: m.stnReceiving,
-    Adjustment: m.positiveAdj,
-  }));
+export function InwardBreakdownChart({ data, isLoading }: InwardBreakdownChartProps) {
+  const pieData = data
+    ? [
+        { name: 'Return (Refurb)', value: data.returnRefurbished },
+        { name: 'Vendor (Virgin)', value: data.vendorVirgin },
+        { name: 'STN Receiving', value: data.receivedInSTN },
+        { name: 'RMA Stock', value: data.stockRMA },
+      ].filter((d) => d.value > 0)
+    : [];
 
   return (
     <Card className="shadow-sm">
       <CardHeader className="pb-2 pt-4">
         <CardTitle className="text-sm font-semibold text-slate-700">
-          Inward Breakdown
+          Source Breakdown (All Inventory)
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {isLoading || !movements ? (
-          <Skeleton className="h-64 w-full" />
+        {isLoading || !data ? (
+          <Skeleton className="h-56 w-full" />
         ) : (
-          <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis dataKey="date" tick={{ fontSize: 10 }} tickLine={false} />
-              <YAxis tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
-              <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8 }} />
+          <ResponsiveContainer width="100%" height={220}>
+            <PieChart>
+              <Pie data={pieData} dataKey="value" outerRadius={75} paddingAngle={2} label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine={false}>
+                {pieData.map((_, i) => (
+                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8 }} formatter={(v) => [(v as number).toLocaleString('en-IN'), '']} />
               <Legend wrapperStyle={{ fontSize: 11 }} />
-              <Bar dataKey="Fresh" stackId="a" fill={INWARD_FRESH} radius={[0, 0, 0, 0]} />
-              <Bar dataKey="Return" stackId="a" fill={INWARD_RETURN} />
-              <Bar dataKey="RMA" stackId="a" fill={INWARD_RMA} />
-              <Bar dataKey="STN" stackId="a" fill={INWARD_STN} />
-              <Bar dataKey="Adjustment" stackId="a" fill={INWARD_POS_ADJ} radius={[4, 4, 0, 0]} />
-            </BarChart>
+            </PieChart>
           </ResponsiveContainer>
         )}
       </CardContent>

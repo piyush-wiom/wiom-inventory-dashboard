@@ -1,76 +1,58 @@
-import { COL, ALL_TRANSACTION_TYPES } from './constants';
-import type { Transaction, TransactionType, ReconciliationStatus } from '@/types/inventory';
+import { COL } from './constants';
+import type { DeviceRecord, AssetType, SourceInventory, DispatchStatus, Condition } from '@/types/inventory';
 
 // ---------------------------------------------------------------------------
-// Date normalisation — handle DD-MM-YYYY, DD/MM/YYYY, YYYY-MM-DD, MM/DD/YYYY
-// Always outputs YYYY-MM-DD
+// Date normalisation: handles MM/DD/YYYY → YYYY-MM-DD
 // ---------------------------------------------------------------------------
 function normaliseDate(raw: string): string {
-  if (!raw) return '';
+  if (!raw?.trim()) return '';
 
-  // Already ISO: YYYY-MM-DD
+  // Already ISO YYYY-MM-DD
   if (/^\d{4}-\d{2}-\d{2}$/.test(raw.trim())) return raw.trim();
 
-  // DD-MM-YYYY or DD/MM/YYYY
-  const dmyMatch = raw.trim().match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  // MM/DD/YYYY (sheet format)
+  const mdyMatch = raw.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (mdyMatch) {
+    const [, m, d, y] = mdyMatch;
+    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+  }
+
+  // DD-MM-YYYY fallback
+  const dmyMatch = raw.trim().match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
   if (dmyMatch) {
     const [, d, m, y] = dmyMatch;
     return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
   }
 
-  // Fallback: try native Date parse
-  const d = new Date(raw);
-  if (!isNaN(d.getTime())) {
-    return d.toISOString().slice(0, 10);
-  }
-
-  return '';
-}
-
-function normaliseStatus(raw: string): ReconciliationStatus {
-  const s = (raw ?? '').trim().toLowerCase();
-  if (s.includes('reconcil')) return 'Reconciled';
-  if (s.includes('partial')) return 'Partial';
-  if (s.includes('force')) return 'Force Closed';
-  return 'Open';
-}
-
-function normaliseTransactionType(raw: string): TransactionType | null {
-  const s = (raw ?? '').trim();
-  const found = ALL_TRANSACTION_TYPES.find(
-    (t) => t.toLowerCase() === s.toLowerCase(),
-  );
-  return found ?? null;
+  const parsed = new Date(raw);
+  return isNaN(parsed.getTime()) ? '' : parsed.toISOString().slice(0, 10);
 }
 
 // ---------------------------------------------------------------------------
-// Main parser — skips header row (index 0) and empty rows
+// Parse raw sheet rows into DeviceRecord[]
+// Skips header row (index 0) and empty rows
 // ---------------------------------------------------------------------------
-export function parseTransactions(rows: string[][]): Transaction[] {
+export function parseDeviceRecords(rows: string[][]): DeviceRecord[] {
   const [, ...dataRows] = rows; // skip header
 
   return dataRows
-    .filter((row) => row && row.length > COL.TRANSACTION_TYPE && row[COL.TRANSACTION_TYPE]?.trim())
-    .map((row, idx): Transaction | null => {
-      const rawType = row[COL.TRANSACTION_TYPE] ?? '';
-      const type = normaliseTransactionType(rawType);
-      if (!type) return null;
-
-      return {
-        sr: parseInt(row[COL.SR] ?? String(idx + 1), 10) || idx + 1,
-        transactionType: type,
-        documentNo: row[COL.DOCUMENT_NO] ?? '',
-        sourceNode: row[COL.SOURCE_NODE] ?? '',
-        destinationNode: row[COL.DESTINATION_NODE] ?? '',
-        docDate: normaliseDate(row[COL.DOC_DATE] ?? ''),
-        sku: row[COL.SKU] ?? '',
-        qty: parseInt(row[COL.QTY] ?? '0', 10) || 0,
-        stage: row[COL.STAGE] ?? '',
-        linkedDocNo: row[COL.LINKED_DOC_NO] ?? '',
-        linkedDocType: row[COL.LINKED_DOC_TYPE] ?? '',
-        status: normaliseStatus(row[COL.STATUS] ?? ''),
-        remarks: row[COL.REMARKS] ?? '',
-      };
-    })
-    .filter((t): t is Transaction => t !== null);
+    .filter((row) => row && row.length > COL.DISPATCH_STATUS && row[COL.ASSET_TYPE]?.trim())
+    .map((row): DeviceRecord => ({
+      entryDate: normaliseDate(row[COL.DATE] ?? ''),
+      macId: row[COL.MAC_ID] ?? '',
+      serialNo: row[COL.SERIAL_NO] ?? '',
+      deviceId: row[COL.DEVICE_ID] ?? '',
+      modelNo: row[COL.MODEL_NO] ?? '',
+      assetType: (row[COL.ASSET_TYPE]?.trim().toUpperCase() as AssetType) ?? 'ROUTER',
+      areaName: row[COL.AREA_NAME] ?? '',
+      sourceInventory: (row[COL.SOURCE_INV]?.trim() as SourceInventory) ?? 'Vendor (Virgin)',
+      condition: (row[COL.CONDITION]?.trim() as Condition) ?? 'Z-GOOD',
+      invStickering: row[COL.INV_STICKERING] ?? '',
+      dispatchStatus: (row[COL.DISPATCH_STATUS]?.trim() as DispatchStatus) ?? 'Pending',
+      qty: parseInt(row[COL.QTY] ?? '1', 10) || 1,
+      dispatchDate: normaliseDate(row[COL.DISPATCH_DATE] ?? ''),
+      typeOfInventory: row[COL.TYPE_OF_INVENTORY] ?? '',
+      warehouseType: row[COL.WAREHOUSE_TYPE] ?? '',
+      remarks: row[COL.REMARKS] ?? '',
+    }));
 }

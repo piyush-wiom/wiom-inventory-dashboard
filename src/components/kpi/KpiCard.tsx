@@ -4,7 +4,7 @@ import {
   Package,
   ArrowDownToLine,
   ArrowUpFromLine,
-  CalendarClock,
+  Layers,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { KpiData } from '@/types/inventory';
@@ -14,7 +14,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Package,
   ArrowDownToLine,
   ArrowUpFromLine,
-  CalendarClock,
+  Layers,
 };
 
 interface KpiCardProps {
@@ -24,10 +24,6 @@ interface KpiCardProps {
 
 export function KpiCard({ config, kpi }: KpiCardProps) {
   const Icon = ICON_MAP[config.icon] ?? Package;
-  const value = config.getValue(kpi);
-  const colour = config.getColour(kpi);
-  const subtitle = config.subtitle(kpi);
-
   return (
     <Card className="shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between pb-2 pt-4">
@@ -37,8 +33,10 @@ export function KpiCard({ config, kpi }: KpiCardProps) {
         <Icon className="h-4 w-4 text-slate-400" />
       </CardHeader>
       <CardContent>
-        <p className={`text-3xl font-bold ${colour}`}>{value}</p>
-        <p className="mt-1 text-xs text-slate-500">{subtitle}</p>
+        <p className={`text-3xl font-bold ${config.getColour(kpi)}`}>
+          {config.getValue(kpi)}
+        </p>
+        <p className="mt-1 text-xs text-slate-500">{config.subtitle(kpi)}</p>
       </CardContent>
     </Card>
   );
