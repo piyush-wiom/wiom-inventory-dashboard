@@ -7,7 +7,7 @@ export const SHEET_ID =
   '1XA-yPDYidXs_8DKRA8QNEbgQLA2tQbu8GkW1wn0OBL0';
 
 export const SHEET_TAB =
-  process.env.NEXT_PUBLIC_SHEET_NAME ?? 'Delhi_Saket_Area Wise Inv';
+  (process.env.NEXT_PUBLIC_SHEET_NAME ?? 'Delhi_Saket_Area Wise Inv').trim();
 
 // Column indices (0-based) for "Delhi_Saket_Area Wise Inv"
 // Verified against live sheet headers on 24-Apr-2026
