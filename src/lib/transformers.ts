@@ -47,7 +47,7 @@ export function parseDeviceRecords(rows: string[][]): DeviceRecord[] {
       areaName: row[COL.AREA_NAME] ?? '',
       sourceInventory: (row[COL.SOURCE_INV]?.trim() as SourceInventory) ?? 'Vendor (Virgin)',
       condition: (row[COL.CONDITION]?.trim() as Condition) ?? 'Z-GOOD',
-      invStickering: row[COL.INV_STICKERING] ?? '',
+      invStickering: '',
       dispatchStatus: (row[COL.DISPATCH_STATUS]?.trim() as DispatchStatus) ?? 'Pending',
       qty: parseInt(row[COL.QTY] ?? '1', 10) || 1,
       dispatchDate: normaliseDate(row[COL.DISPATCH_DATE] ?? ''),

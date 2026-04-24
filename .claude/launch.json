@@ -6,7 +6,8 @@
       "runtimeExecutable": "npm.cmd",
       "runtimeArgs": ["run", "dev"],
       "cwd": "C:\\Claude Projects\\Inventory Dashboard",
-      "port": 3001
+      "port": 3001,
+      "autoPort": true
     },
     {
       "name": "Next.js Production Preview",

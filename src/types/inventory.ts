@@ -171,6 +171,29 @@ export interface DailyReportData {
   lastRefreshed: string;
 }
 
+// ---------------------------------------------------------------------------
+// Monthly Analysis — computed from device records, one card per month
+// ---------------------------------------------------------------------------
+
+export interface MonthlyReportRow {
+  label: string;
+  isInward: boolean;
+  isOutward: boolean;
+  isHighlight: boolean;   // Opening and Closing rows get dark background
+  qty: AssetQty;
+}
+
+export interface MonthlyMonth {
+  monthKey: string;       // e.g. "2026-01"
+  monthLabel: string;     // e.g. "January 2026"
+  rows: MonthlyReportRow[];
+}
+
+export interface MonthlyAnalysisData {
+  months: MonthlyMonth[];
+  lastRefreshed: string;
+}
+
 export interface InventoryApiResponse {
   kpi: KpiData;
   sourceBreakdown: SourceBreakdown;

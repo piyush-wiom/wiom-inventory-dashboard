@@ -22,7 +22,19 @@
       "Bash(powershell -Command \"Get-ChildItem ''C:\\\\Claude Projects\\\\Inventory Dashboard'' | Select Name\")",
       "Bash(npm run:*)",
       "mcp__Claude_Preview__preview_start",
-      "Bash(node -e \":*)"
+      "Bash(node -e \":*)",
+      "Bash(curl -s \"https://wiom-inventory-dashboard-production.up.railway.app/api/monthly-analysis?year=2026&months=1\")",
+      "Bash(node -e ' *)",
+      "Bash(rm \"C:/Claude Projects/Inventory Dashboard/tmp_live.json\")",
+      "Bash(curl -s \"https://wiom-inventory-dashboard-production.up.railway.app/api/inventory\")",
+      "Bash(rm \"C:/Claude Projects/Inventory Dashboard/tmp_inv.json\")",
+      "Bash(npx tsc *)",
+      "Bash(set RAILWAY_TOKEN=91bac255-c818-420d-951d-be2822f0abc1)",
+      "Bash(railway up *)",
+      "Bash(railway whoami *)",
+      "Bash(gh --version)",
+      "Bash(gh auth *)",
+      "Bash(gh repo *)"
     ]
   }
 }

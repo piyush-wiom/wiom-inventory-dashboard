@@ -9,16 +9,16 @@ import { StockMovementChart } from '@/components/charts/StockMovementChart';
 import { InwardBreakdownChart } from '@/components/charts/InwardBreakdownChart';
 import { OutwardBreakdownChart } from '@/components/charts/OutwardBreakdownChart';
 import { ReconciliationSummary } from '@/components/reconciliation/ReconciliationSummary';
-import { TransactionTable } from '@/components/transactions/TransactionTable';
 import { DailyReportTab } from '@/components/daily/DailyReportTab';
+import { MonthlyAnalysisTab } from '@/components/monthly/MonthlyAnalysisTab';
 import { AlertCircle } from 'lucide-react';
 
-type Tab = 'daily' | 'overview' | 'log';
+type Tab = 'daily' | 'monthly' | 'overview';
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'daily',    label: '📋 Daily Report' },
+  { id: 'monthly',  label: '📈 Month Analysis' },
   { id: 'overview', label: '📊 Inventory Overview' },
-  { id: 'log',      label: '📝 Device Log' },
 ];
 
 export function DashboardClient() {
@@ -64,6 +64,9 @@ export function DashboardClient() {
         {/* ── Daily Report tab ──────────────────────────────────────────── */}
         {activeTab === 'daily' && <DailyReportTab />}
 
+        {/* ── Month Analysis tab ────────────────────────────────────────── */}
+        {activeTab === 'monthly' && <MonthlyAnalysisTab />}
+
         {/* ── Inventory Overview tab ────────────────────────────────────── */}
         {activeTab === 'overview' && (
           <>
@@ -105,21 +108,6 @@ export function DashboardClient() {
           </>
         )}
 
-        {/* ── Device Log tab ────────────────────────────────────────────── */}
-        {activeTab === 'log' && (
-          <>
-            {hasError && (
-              <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
-                <div>
-                  <p className="font-semibold">Failed to load device records</p>
-                  <p className="mt-0.5 font-mono text-xs text-red-500">{errorMsg}</p>
-                </div>
-              </div>
-            )}
-            <TransactionTable records={data?.records} isLoading={isLoading} />
-          </>
-        )}
       </main>
     </div>
   );
